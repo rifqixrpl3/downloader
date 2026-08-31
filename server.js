@@ -70,7 +70,7 @@ const server = http.createServer(async (request, response) => {
     } catch { response.writeHead(200, { "Content-Type": "application/json" }); response.end(JSON.stringify({ ok: false, status: "offline", latency: Date.now() - startedAt, checkedAt: new Date().toISOString() })); }
     return;
   }
-  if (requestUrl.pathname === "/proxy-download") {
+  if (requestUrl.pathname === "/proxy-download" || requestUrl.pathname === "/api/proxy-download") {
     const target = requestUrl.searchParams.get("url");
     if (!target) { response.writeHead(400); response.end("Missing url"); return; }
     try {

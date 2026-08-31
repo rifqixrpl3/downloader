@@ -76,7 +76,7 @@ if (typeof document === "undefined") {
     return `${cleanName}${extension || ""}`;
   }
   function downloadFile(mediaUrl, filename) {
-    const proxyUrl = new URL("/proxy-download", window.location.origin);
+    const proxyUrl = new URL("/api/proxy-download", window.location.origin);
     proxyUrl.searchParams.set("url", mediaUrl);
     if (window.matchMedia("(pointer: coarse)").matches) {
       window.location.assign(proxyUrl.href);
