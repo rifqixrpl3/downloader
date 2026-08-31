@@ -34,7 +34,12 @@ if (typeof document === "undefined") {
   const apiNeedle = document.querySelector("#apiNeedle");
   const apiLatency = document.querySelector("#apiLatency");
   const footerApiStatus = document.querySelector("#footerApiStatus");
+  const systemPopup = document.querySelector("#systemPopup");
+  const systemPopupClose = document.querySelector("#systemPopupClose");
+  const systemPopupButton = document.querySelector("#systemPopupButton");
   let activeMode = "download";
+
+  function closeSystemPopup() { systemPopup?.setAttribute("hidden", ""); }
 
   function showError(message) { errorMessage.textContent = message; errorMessage.hidden = false; }
   function hideError() { errorMessage.hidden = true; }
@@ -181,6 +186,10 @@ if (typeof document === "undefined") {
     try { await downloadFile(resultLink.href, resultLink.download || "droply-media"); }
     catch (error) { showError(error.message || "Download gagal. Coba lagi."); }
   });
+
+  systemPopupClose?.addEventListener("click", closeSystemPopup);
+  systemPopupButton?.addEventListener("click", closeSystemPopup);
+  systemPopup?.addEventListener("click", (event) => { if (event.target === systemPopup) closeSystemPopup(); });
 
   checkApiStatus();
   setInterval(checkApiStatus, 30000);
