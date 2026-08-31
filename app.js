@@ -75,9 +75,13 @@ if (typeof document === "undefined") {
     const extension = new URL(mediaUrl, MEDIA_BASE_URL).pathname.match(/\.[a-z0-9]{2,5}$/i)?.[0];
     return `${cleanName}${extension || ""}`;
   }
-  async function downloadFile(mediaUrl, filename) {
+  function downloadFile(mediaUrl, filename) {
     const proxyUrl = new URL("/proxy-download", window.location.origin);
     proxyUrl.searchParams.set("url", mediaUrl);
+    if (window.matchMedia("(pointer: coarse)").matches) {
+      window.location.assign(proxyUrl.href);
+      return;
+    }
     const link = document.createElement("a");
     link.href = proxyUrl.href;
     link.download = filename;
