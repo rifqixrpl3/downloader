@@ -2,6 +2,7 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const { URL } = require("url");
+const { Readable } = require("stream");
 
 const port = 3000;
 const root = __dirname;
@@ -77,8 +78,17 @@ const server = http.createServer(async (request, response) => {
       const targetUrl = new URL(target);
       if (targetUrl.hostname !== allowedHost) { response.writeHead(403); response.end("Host is not allowed"); return; }
       if (targetUrl.pathname === "/api/download-image" && apiKey) targetUrl.searchParams.set("apikey", apiKey);
-      response.writeHead(302, { Location: targetUrl.toString(), "Cache-Control": "no-store" });
-      response.end();
+      const mediaResponse = await fetch(targetUrl);
+      if (!mediaResponse.ok || !mediaResponse.body) { response.writeHead(mediaResponse.status || 502); response.end("Media tidak dapat diunduh"); return; }
+      const headers = {
+        "Cache-Control": "no-store",
+        "Content-Type": mediaResponse.headers.get("content-type") || "application/octet-stream",
+        "Content-Disposition": "attachment; filename=download",
+      };
+      const contentLength = mediaResponse.headers.get("content-length");
+      if (contentLength) headers["Content-Length"] = contentLength;
+      response.writeHead(200, headers);
+      Readable.fromWeb(mediaResponse.body).pipe(response);
     } catch { response.writeHead(502); response.end("Unable to download media"); }
     return;
   }

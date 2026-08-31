@@ -1,4 +1,5 @@
 const { URL } = require("url");
+const { Readable } = require("stream");
 
 const apiKey = process.env.EVERYTHING_API_KEY;
 const allowedHost = "everythingjkt48.my.id";
@@ -25,12 +26,18 @@ module.exports = async function handler(req, res) {
       targetUrl.searchParams.set("apikey", apiKey);
     }
 
-    // Do not stream the media through a Vercel Function. Large media responses
-    // consume the function's bandwidth and can exceed its response limits.
-    // A redirect keeps the API key server-side while the browser downloads the
-    // actual file directly from the upstream media host.
+    const mediaResponse = await fetch(targetUrl);
+    if (!mediaResponse.ok || !mediaResponse.body) {
+      return res.status(mediaResponse.status || 502).send("Media tidak dapat diunduh");
+    }
+
+    const contentType = mediaResponse.headers.get("content-type") || "application/octet-stream";
+    const contentLength = mediaResponse.headers.get("content-length");
     res.setHeader("Cache-Control", "no-store");
-    return res.redirect(302, targetUrl.toString());
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Content-Disposition", "attachment; filename=download");
+    if (contentLength) res.setHeader("Content-Length", contentLength);
+    return Readable.fromWeb(mediaResponse.body).pipe(res);
   } catch (error) {
     return res.status(502).send("Unable to download media");
   }
