@@ -1,13 +1,4 @@
 {
-  "public": "public",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/public/$1"
-    },
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
-    }
-  ]
+  "buildCommand": "echo 'Static build'",
+  "outputDirectory": "public"
 }
