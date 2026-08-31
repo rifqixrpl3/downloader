@@ -1,13 +1,12 @@
 {
   "name": "borif-dl",
   "version": "1.0.0",
-  "description": "BorifDL — downloader media TikTok, Instagram, X, dan pencarian foto Pinterest.",
-  "main": "server.js",
+  "description": "BorifDL — downloader media TikTok, Instagram, YouTube, X, dan pencarian foto Pinterest.",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "start": "node server.js"
   },
-  "keywords": ["downloader", "tiktok", "instagram", "pinterest"],
+  "keywords": ["downloader", "tiktok", "instagram", "youtube", "pinterest"],
   "author": "",
   "license": "MIT"
 }

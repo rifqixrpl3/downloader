@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BorifDL — downloader media TikTok, Instagram, X, YouTube dan pencarian foto Pinterest.">
+  <title>BorifDL — Media Downloader</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Droply home">
+        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span>Borif<span class="brand-dot">DL</span></span>
+      </a>
+      <div class="api-meter" id="apiStatus" title="Memeriksa status API...">
+        <div class="meter-face"><span class="meter-tick tick-one"></span><span class="meter-tick tick-two"></span><span class="meter-tick tick-three"></span><span class="meter-needle" id="apiNeedle"></span><span class="meter-center"></span></div>
+        <div class="meter-readout"><span class="status-dot"></span><span id="apiStatusText">CHECKING</span><small id="apiLatency">-- ms</small></div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero-section">
+        <div class="hero-copy">
+          <p class="eyebrow">MEDIA DOWNLOADER <span>•</span> v1.0</p>
+          <h1>Save your<br><em>File.</em></h1>
+          <p class="hero-description">Unduh video dan foto favoritmu dari TikTok, Instagram, YouTube, X dalam beberapa detik.</p>
+        </div>
+
+        <div class="download-panel" id="dropZone">
+          <div class="panel-topline">
+            <span class="panel-label">Place ur file</span>
+            <span class="panel-hint">Ctrl + V</span>
+          </div>
+          <div class="mode-tabs" role="tablist" aria-label="Pilih mode">
+            <button class="mode-tab active" id="downloadMode" type="button" role="tab" aria-selected="true">Download media</button>
+            <button class="mode-tab" id="youtubeMode" type="button" role="tab" aria-selected="false">YouTube</button>
+            <button class="mode-tab" id="pinterestMode" type="button" role="tab" aria-selected="false">Cari Pinterest</button>
+          </div>
+          <form id="downloadForm">
+            <div class="url-field-wrap">
+              <span class="link-icon" aria-hidden="true">↗</span>
+              <input id="urlInput" name="url" type="url" placeholder="https://..." autocomplete="url" required>
+              <button class="clear-button" id="clearButton" type="button" aria-label="Hapus link" hidden>×</button>
+            </div>
+            <div class="download-options">
+              <label class="option-toggle"><input id="audioOnlyInput" type="checkbox"><span class="toggle-track"></span><span>Audio saja</span></label>
+              <label class="quality-option" for="qualityInput">KUALITAS
+                <select id="qualityInput"><option value="">Maksimal</option><option value="1080">1080p</option><option value="720">720p</option></select>
+              </label>
+            </div>
+            <button class="download-button" id="downloadButton" type="submit">
+              <span id="buttonText">Download sekarang</span>
+              <span class="button-arrow" aria-hidden="true">↗</span>
+            </button>
+          </form>
+          <div class="supported-row">
+            <span>SUPPORT</span>
+            <span class="platform-chip"><b>♪</b> TikTok</span>
+            <span class="platform-chip"><b>◎</b> Instagram</span>
+            <span class="platform-chip"><b>▶</b> YouTube</span>
+            <span class="platform-chip"><b>𝕏</b> X</span>
+            <span class="platform-chip pinterest-chip"><b>▧</b> Pinterest</span>
+          </div>
+        </div>
+        <div class="drop-caption"><span class="sparkle">✦</span> atau drop link di mana saja di area ini</div>
+      </section>
+
+      <section class="result-section" id="resultSection" aria-live="polite">
+        <div class="section-heading">
+          <p class="eyebrow">HASIL DOWNLOAD</p>
+          <span class="result-count" id="resultCount">0 item</span>
+        </div>
+        <div class="result-card empty-state" id="emptyState">
+          <div class="empty-icon">↓</div>
+          <div><strong>Belum ada yang diunduh</strong><span>Hasil file kamu akan muncul di sini.</span></div>
+        </div>
+        <div class="result-card result-content" id="resultContent" hidden>
+          <div class="result-icon" aria-hidden="true">✓</div>
+          <div class="result-details">
+            <strong id="resultTitle">Media siap diunduh</strong>
+            <span id="resultMeta">Link berhasil diproses</span>
+          </div>
+          <a class="open-button" id="resultLink" href="#" download>Download file <span>↓</span></a>
+        </div>
+        <div class="image-gallery" id="imageGallery" hidden></div>
+        <div class="error-message" id="errorMessage" role="alert" hidden></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>BORIF<span class="brand-dot">DL</span> / BUILT FOR THE INTERNET</span>
+      <span class="settings-button">API <span id="footerApiStatus">CHECKING</span></span>
+    </footer>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "buildCommand": "true",
+  "env": {
+    "EVERYTHING_API_KEY": "@everything_api_key"
+  },
+  "public": "public"
+}
