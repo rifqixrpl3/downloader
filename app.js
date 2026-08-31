@@ -1,6 +1,11 @@
 if (typeof document === "undefined") {
   if (typeof module !== "undefined") {
-    module.exports = {};
+    module.exports = async function serverlessStub(req, res) {
+      if (res && typeof res.status === "function") {
+        return res.status(200).json({ ok: true, message: "Static asset loader stub" });
+      }
+      return { ok: true, message: "Static asset loader stub" };
+    };
   }
 } else {
   const API_ENDPOINT = "/api/download";
