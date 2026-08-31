@@ -17,15 +17,20 @@ module.exports = async function handler(req, res) {
   const startedAt = Date.now();
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
     const apiResponse = await fetch(
       `https://${allowedHost}/api/news?apikey=${encodeURIComponent(apiKey)}`,
       {
         headers: {
           Authorization: `Bearer ${apiKey}`,
         },
+        signal: controller.signal,
       }
     );
 
+    clearTimeout(timeout);
     res.setHeader("Cache-Control", "no-store");
     return res.status(200).json({
       ok: apiResponse.ok,

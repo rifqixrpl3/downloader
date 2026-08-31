@@ -17,14 +17,19 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 25000);
+
     const apiResponse = await fetch(
       `https://${allowedHost}/api/pinterest?q=${encodeURIComponent(query)}&apikey=${encodeURIComponent(apiKey)}`,
       {
         headers: {
           Authorization: `Bearer ${apiKey}`,
         },
+        signal: controller.signal,
       }
     );
+    clearTimeout(timeout);
 
     const data = await apiResponse.json();
     return res.status(apiResponse.status).json(data);

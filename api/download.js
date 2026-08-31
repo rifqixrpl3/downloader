@@ -12,6 +12,9 @@ module.exports = async function handler(req, res) {
   try {
     const body = typeof req.body === "string" ? req.body : JSON.stringify(req.body);
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 55000);
+
     const apiResponse = await fetch(
       `https://everythingjkt48.my.id/api/download?apikey=${encodeURIComponent(apiKey)}`,
       {
@@ -21,8 +24,10 @@ module.exports = async function handler(req, res) {
           Authorization: `Bearer ${apiKey}`,
         },
         body: body,
+        signal: controller.signal,
       }
     );
+    clearTimeout(timeout);
 
     const data = await apiResponse.json();
     return res.status(apiResponse.status).json(data);
