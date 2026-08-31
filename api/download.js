@@ -10,6 +10,8 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    const body = typeof req.body === "string" ? req.body : JSON.stringify(req.body);
+
     const apiResponse = await fetch(
       `https://everythingjkt48.my.id/api/download?apikey=${encodeURIComponent(apiKey)}`,
       {
@@ -18,13 +20,14 @@ module.exports = async function handler(req, res) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${apiKey}`,
         },
-        body: JSON.stringify(req.body),
+        body: body,
       }
     );
 
     const data = await apiResponse.json();
     return res.status(apiResponse.status).json(data);
   } catch (error) {
+    console.error("Download API Error:", error);
     return res.status(502).json({
       ok: false,
       error: "API downloader tidak dapat dihubungi.",

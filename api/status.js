@@ -35,6 +35,7 @@ module.exports = async function handler(req, res) {
       checkedAt: new Date().toISOString(),
     });
   } catch (error) {
+    console.error("Status Check Error:", error);
     return res.status(200).json({
       ok: false,
       status: "offline",

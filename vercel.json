@@ -1,23 +1,13 @@
 {
   "public": "public",
-  "env": {
-    "EVERYTHING_API_KEY": "@everything_api_key"
-  },
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    }
-  ],
-  "headers": [
+      "source": "/(.*)",
+      "destination": "/public/$1"
+    },
     {
-      "source": "/public/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=3600"
-        }
-      ]
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
     }
   ]
 }
