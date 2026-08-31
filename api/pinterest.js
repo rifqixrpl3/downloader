@@ -31,7 +31,13 @@ module.exports = async function handler(req, res) {
     );
     clearTimeout(timeout);
 
-    const data = await apiResponse.json();
+    const responseText = await apiResponse.text();
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch {
+      return res.status(502).json({ ok: false, error: "API Pinterest merespons format yang tidak valid." });
+    }
     return res.status(apiResponse.status).json(data);
   } catch (error) {
     return res.status(502).json({

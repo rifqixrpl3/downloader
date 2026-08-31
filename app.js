@@ -41,6 +41,14 @@ if (typeof document === "undefined") {
 
   function closeSystemPopup() { systemPopup?.setAttribute("hidden", ""); }
 
+  function parseApiResponse(responseText) {
+    try { return JSON.parse(responseText); }
+    catch {
+      if (/^\s*</.test(responseText)) throw new Error("Server mengirim halaman HTML, bukan respons API. Periksa endpoint API Pinterest pada deployment.");
+      throw new Error("Server mengirim respons API yang tidak valid.");
+    }
+  }
+
   function showError(message) { errorMessage.textContent = message; errorMessage.hidden = false; }
   function hideError() { errorMessage.hidden = true; }
   async function checkApiStatus() {
@@ -124,15 +132,19 @@ if (typeof document === "undefined") {
     document.querySelector(".download-options").hidden = isPinterest || isYoutube;
   }
   function extractImages(payload) {
-    if (!payload || typeof payload !== "object") return [];
-    const candidates = [payload.images, payload.results, payload.data, payload.photos, payload.items];
-    for (const candidate of candidates) {
-      if (Array.isArray(candidate)) {
-        const urls = candidate.map((item) => typeof item === "string" ? item : item?.hd_image || item?.download_url || item?.url || item?.image || item?.src).filter((url) => typeof url === "string" && /^https?:\/\//i.test(url));
-        if (urls.length) return urls;
+    const imageKeys = /^(hd_image|image_url|download_url|image|images|src|original|originals|url)$/i;
+    const urls = new Set();
+    function visit(value, key = "", depth = 0) {
+      if (depth > 8 || value == null) return;
+      if (typeof value === "string") {
+        if ((imageKeys.test(key) || /\.(?:jpe?g|png|webp|gif)(?:[?#]|$)/i.test(value)) && /^https?:\/\//i.test(value)) urls.add(value);
+        return;
       }
+      if (Array.isArray(value)) { value.forEach((item) => visit(item, key, depth + 1)); return; }
+      if (typeof value === "object") Object.entries(value).forEach(([childKey, childValue]) => visit(childValue, childKey, depth + 1));
     }
-    return [];
+    visit(payload);
+    return [...urls];
   }
 
   urlInput.addEventListener("input", () => { clearButton.hidden = !urlInput.value; });
@@ -154,7 +166,7 @@ if (typeof document === "undefined") {
         const endpoint = `/api/youtube`;
         const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: sourceUrl, audioOnly: audioOnlyInput.checked, quality: qualityInput.value }) });
         const responseText = await response.text();
-        const payload = JSON.parse(responseText);
+        const payload = parseApiResponse(responseText);
         if (!response.ok) throw new Error(payload?.message || payload?.error || `Request gagal (${response.status})`);
         if (payload?.ok === false) throw new Error(payload.error || "Request ditolak oleh API.");
         const mediaUrl = payload?.url || findMediaUrl(payload);
@@ -165,7 +177,7 @@ if (typeof document === "undefined") {
       const request = activeMode === "pinterest" ? { method: "GET" } : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: sourceUrl, audioOnly: audioOnlyInput.checked, quality: qualityInput.value }) };
       const response = await fetch(endpoint, request);
       const responseText = await response.text();
-      const payload = JSON.parse(responseText);
+      const payload = parseApiResponse(responseText);
       if (!response.ok) throw new Error(payload?.message || payload?.error || `Request gagal (${response.status})`);
       if (payload?.ok === false) throw new Error(payload.error || "Request ditolak oleh API.");
       if (activeMode === "pinterest") {

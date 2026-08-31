@@ -40,6 +40,9 @@ body::before { content: ""; position: fixed; inset: 0; pointer-events: none; opa
 	.image-gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
+.api-meter { position: fixed; z-index: 10; right: 24px; bottom: 24px; padding: 9px 12px; border: 1px solid #cbd8cc; border-radius: 10px; background: rgba(245,247,241,.94); box-shadow: 0 10px 28px rgba(23,37,31,.12); }
+@media (max-width: 480px) { .api-meter { right: 12px; bottom: 12px; gap: 8px; padding: 7px 9px; }.api-meter .meter-face { width: 60px; } }
+
 @media (max-width: 480px) {
 	.system-popup-card { padding: 28px 22px 22px; }.system-popup-card h2 { font-size: 17px; }
 	.page-shell { padding-inline: 16px; }
