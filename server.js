@@ -77,14 +77,7 @@ const server = http.createServer(async (request, response) => {
       const targetUrl = new URL(target);
       if (targetUrl.hostname !== allowedHost) { response.writeHead(403); response.end("Host is not allowed"); return; }
       if (targetUrl.pathname === "/api/download-image" && apiKey) targetUrl.searchParams.set("apikey", apiKey);
-      const mediaResponse = await fetch(targetUrl);
-      if (!mediaResponse.ok) { response.writeHead(mediaResponse.status); response.end("Media request failed"); return; }
-      response.writeHead(200, {
-        "Content-Type": mediaResponse.headers.get("content-type") || "application/octet-stream",
-        "Content-Disposition": "attachment; filename=\"droply-media\"",
-        "Cache-Control": "no-store"
-      });
-      for await (const chunk of mediaResponse.body) response.write(chunk);
+      response.writeHead(302, { Location: targetUrl.toString(), "Cache-Control": "no-store" });
       response.end();
     } catch { response.writeHead(502); response.end("Unable to download media"); }
     return;

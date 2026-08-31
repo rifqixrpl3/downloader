@@ -25,24 +25,12 @@ module.exports = async function handler(req, res) {
       targetUrl.searchParams.set("apikey", apiKey);
     }
 
-    const mediaResponse = await fetch(targetUrl.toString());
-
-    if (!mediaResponse.ok) {
-      return res.status(mediaResponse.status).send("Media request failed");
-    }
-
-    res.setHeader(
-      "Content-Type",
-      mediaResponse.headers.get("content-type") || "application/octet-stream"
-    );
-    res.setHeader("Content-Disposition", 'attachment; filename="droply-media"');
+    // Do not stream the media through a Vercel Function. Large media responses
+    // consume the function's bandwidth and can exceed its response limits.
+    // A redirect keeps the API key server-side while the browser downloads the
+    // actual file directly from the upstream media host.
     res.setHeader("Cache-Control", "no-store");
-
-    for await (const chunk of mediaResponse.body) {
-      res.write(chunk);
-    }
-
-    res.end();
+    return res.redirect(302, targetUrl.toString());
   } catch (error) {
     return res.status(502).send("Unable to download media");
   }

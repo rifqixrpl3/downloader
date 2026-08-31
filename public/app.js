@@ -60,11 +60,13 @@ if (typeof document === "undefined") {
   async function downloadFile(mediaUrl, filename) {
     const proxyUrl = new URL("/proxy-download", window.location.origin);
     proxyUrl.searchParams.set("url", mediaUrl);
-    const response = await fetch(proxyUrl);
-    if (!response.ok) throw new Error("File tidak bisa diunduh dari server.");
-    const blobUrl = URL.createObjectURL(await response.blob());
-    const link = document.createElement("a"); link.href = blobUrl; link.download = filename; link.click();
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+    const link = document.createElement("a");
+    link.href = proxyUrl.href;
+    link.download = filename;
+    link.rel = "noopener";
+    document.body.append(link);
+    link.click();
+    link.remove();
   }
   function findMediaUrl(payload) {
     if (typeof payload === "string") return /^https?:\/\//i.test(payload) ? payload : "";
