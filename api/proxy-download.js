@@ -3,6 +3,10 @@ const { Readable } = require("stream");
 
 const apiKey = process.env.EVERYTHING_API_KEY;
 const allowedHost = "everythingjkt48.my.id";
+const allowedMediaHosts = ["tiktokcdn.com", "tiktokcdn-us.com", "tiktokv.com", "ibytedtos.com", "byteoversea.com", "muscdn.com", "cdninstagram.com", "fbcdn.net", "googlevideo.com", "pinimg.com"];
+function isAllowedMediaHost(hostname) {
+  return hostname === allowedHost || allowedMediaHosts.some((host) => hostname === host || hostname.endsWith(`.${host}`));
+}
 
 module.exports = async function handler(req, res) {
   if (req.method !== "GET") {
@@ -10,6 +14,7 @@ module.exports = async function handler(req, res) {
   }
 
   const target = req.query.url;
+  const requestedFilename = req.query.filename || "droply-media";
 
   if (!target) {
     return res.status(400).send("Missing url");
@@ -18,7 +23,7 @@ module.exports = async function handler(req, res) {
   try {
     const targetUrl = new URL(target);
 
-    if (targetUrl.hostname !== allowedHost) {
+    if (!isAllowedMediaHost(targetUrl.hostname)) {
       return res.status(403).send("Host is not allowed");
     }
 
@@ -33,9 +38,12 @@ module.exports = async function handler(req, res) {
 
     const contentType = mediaResponse.headers.get("content-type") || "application/octet-stream";
     const contentLength = mediaResponse.headers.get("content-length");
+    const safeFilename = requestedFilename.replace(/[\\/:*?"<>|\r\n]/g, "-").replace(/[^\x20-\x7E]/g, "-").trim() || "droply-media";
+    const extensionByType = { "video/mp4": ".mp4", "video/webm": ".webm", "audio/mpeg": ".mp3", "audio/mp4": ".m4a", "image/jpeg": ".jpg", "image/png": ".png" };
+    const filename = /\.[a-z0-9]{2,5}$/i.test(safeFilename) ? safeFilename : `${safeFilename}${extensionByType[contentType.split(";")[0].toLowerCase()] || ""}`;
     res.setHeader("Cache-Control", "no-store");
     res.setHeader("Content-Type", contentType);
-    res.setHeader("Content-Disposition", "attachment; filename=download");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
     if (contentLength) res.setHeader("Content-Length", contentLength);
     return Readable.fromWeb(mediaResponse.body).pipe(res);
   } catch (error) {

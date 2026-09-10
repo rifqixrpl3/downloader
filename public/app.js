@@ -12,7 +12,6 @@ if (typeof document === "undefined") {
   const buttonText = document.querySelector("#buttonText");
   const dropZone = document.querySelector("#dropZone");
   const emptyState = document.querySelector("#emptyState");
-  const resultContent = document.querySelector("#resultContent");
   const resultLink = document.querySelector("#resultLink");
   const resultTitle = document.querySelector("#resultTitle");
   const resultMeta = document.querySelector("#resultMeta");
@@ -46,19 +45,27 @@ if (typeof document === "undefined") {
 
   function showError(message) { errorMessage.textContent = message; errorMessage.hidden = false; }
   function hideError() { errorMessage.hidden = true; }
+  function updateApiMeter(status) {
+    const isOnline = status.status === "online";
+    const latency = Number(status.latency);
+    const safeLatency = Number.isFinite(latency) ? Math.max(0, latency) : 0;
+    const needleAngle = isOnline ? Math.min(55, Math.max(-55, Math.log10(safeLatency + 10) * 43 - 52)) : -55;
+    const speedClass = !isOnline ? "api-offline" : safeLatency < 400 ? "api-fast" : safeLatency < 1200 ? "api-normal" : "api-slow";
+    apiStatus.classList.remove("api-offline", "api-fast", "api-normal", "api-slow");
+    apiStatus.classList.add(speedClass);
+    apiStatusText.textContent = isOnline ? (safeLatency < 400 ? "FAST" : safeLatency < 1200 ? "READY" : "SLOW") : "OFFLINE";
+    apiLatency.textContent = isOnline ? `${Math.round(safeLatency)} ms` : "-- ms";
+    apiNeedle.style.transform = `rotate(${needleAngle}deg)`;
+    footerApiStatus.textContent = isOnline ? "ONLINE" : "OFFLINE";
+    apiStatus.title = `${isOnline ? "API aktif" : "API tidak tersedia"} • ${isOnline ? `${Math.round(safeLatency)} ms` : "coba lagi nanti"} • ${new Date(status.checkedAt).toLocaleTimeString("id-ID")}`;
+  }
   async function checkApiStatus() {
     try {
       const response = await fetch("/api/status", { cache: "no-store" });
       const status = await response.json();
-      const isOnline = status.status === "online";
-      apiStatus.classList.toggle("api-offline", !isOnline);
-      apiStatusText.textContent = isOnline ? "ONLINE" : "OFFLINE";
-      apiLatency.textContent = isOnline ? `${status.latency} ms` : "-- ms";
-      apiNeedle.style.transform = `rotate(${isOnline ? Math.min(55, Math.max(-55, status.latency / 10 - 35)) : -55}deg)`;
-      footerApiStatus.textContent = isOnline ? "ONLINE" : "OFFLINE";
-      apiStatus.title = `Terakhir dicek: ${new Date(status.checkedAt).toLocaleTimeString("id-ID")}`;
+      updateApiMeter(status);
     } catch {
-      apiStatus.classList.add("api-offline"); apiStatusText.textContent = "OFFLINE"; apiLatency.textContent = "-- ms"; apiNeedle.style.transform = "rotate(-55deg)"; footerApiStatus.textContent = "OFFLINE";
+      updateApiMeter({ status: "offline", latency: 0, checkedAt: new Date().toISOString() });
     }
   }
   function setLoading(isLoading) { downloadButton.disabled = isLoading; buttonText.textContent = isLoading ? "Memproses link..." : "Download sekarang"; }
@@ -73,6 +80,7 @@ if (typeof document === "undefined") {
   function downloadFile(mediaUrl, filename) {
     const proxyUrl = new URL("/api/proxy-download", window.location.origin);
     proxyUrl.searchParams.set("url", mediaUrl);
+    proxyUrl.searchParams.set("filename", filename || "droply-media");
     if (window.matchMedia("(pointer: coarse)").matches) {
       window.location.assign(proxyUrl.href);
       return;
@@ -162,7 +170,7 @@ if (typeof document === "undefined") {
     setLoading(true);
     try {
       if (activeMode === "youtube") {
-        const endpoint = `/api/youtube`;
+        const endpoint = API_ENDPOINT;
         const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: sourceUrl, audioOnly: audioOnlyInput.checked, quality: qualityInput.value }) });
         const responseText = await response.text();
         const payload = parseApiResponse(responseText);

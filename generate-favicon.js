@@ -1,0 +1,36 @@
+const fs = require('fs');
+const path = require('path');
+const sharp = require('sharp');
+
+const root = __dirname;
+const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <rect width="128" height="128" rx="28" fill="#f4efe8"/>
+  <g fill="#1d2f2c">
+    <path d="M44 18h40v32h18L64 76 26 50h18V18Z"/>
+    <path d="M18 56c4 28 18 42 37 42 6 0 11-2 17-4-10-19-24-30-46-36 18 4 34 10 46 22 1-17-7-30-22-38-12-6-27-8-42-10Z"/>
+    <path d="M110 56c-4 28-18 42-37 42-6 0-11-2-17-4 10-19 24-30 46-36-18 4-34 10-46 22-1-17 7-30 22-38 12-6 27-8 42-10Z"/>
+    <path d="M57 103c-6-16-18-30-36-42 22 11 35 27 41 42-1 4-5 4-5 0Z"/>
+    <path d="M71 103c6-16 18-30 36-42-22 11-35 27-41 42 1 4 5 4 5 0Z"/>
+  </g>
+</svg>`;
+
+(async () => {
+  const svgBuffer = Buffer.from(svg);
+  await sharp(svgBuffer)
+    .resize(256, 256)
+    .png()
+    .toFile(path.join(root, 'favicon.png'));
+
+  await sharp(svgBuffer)
+    .resize(32, 32)
+    .png()
+    .toFile(path.join(root, 'favicon-32x32.png'));
+
+  await sharp(svgBuffer)
+    .resize(192, 192)
+    .png()
+    .toFile(path.join(root, 'favicon-192x192.png'));
+
+  console.log('Generated favicon assets');
+})();

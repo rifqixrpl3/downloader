@@ -14,7 +14,6 @@ if (typeof document === "undefined") {
   const urlInput = document.querySelector("#urlInput");
   const clearButton = document.querySelector("#clearButton");
   const downloadButton = document.querySelector("#downloadButton");
-  const buttonText = document.querySelector("#buttonText");
   const dropZone = document.querySelector("#dropZone");
   const emptyState = document.querySelector("#emptyState");
   const resultContent = document.querySelector("#resultContent");
@@ -25,6 +24,8 @@ if (typeof document === "undefined") {
   const errorMessage = document.querySelector("#errorMessage");
   const audioOnlyInput = document.querySelector("#audioOnlyInput");
   const qualityInput = document.querySelector("#qualityInput");
+  const formatInput = document.querySelector("#formatInput");
+  const formatHint = document.querySelector("#formatHint");
   const imageGallery = document.querySelector("#imageGallery");
   const downloadMode = document.querySelector("#downloadMode");
   const youtubeMode = document.querySelector("#youtubeMode");
@@ -51,19 +52,27 @@ if (typeof document === "undefined") {
 
   function showError(message) { errorMessage.textContent = message; errorMessage.hidden = false; }
   function hideError() { errorMessage.hidden = true; }
+  function updateApiMeter(status) {
+    const isOnline = status.status === "online";
+    const latency = Number(status.latency);
+    const safeLatency = Number.isFinite(latency) ? Math.max(0, latency) : 0;
+    const needleAngle = isOnline ? Math.min(55, Math.max(-55, Math.log10(safeLatency + 10) * 43 - 52)) : -55;
+    const speedClass = !isOnline ? "api-offline" : safeLatency < 400 ? "api-fast" : safeLatency < 1200 ? "api-normal" : "api-slow";
+    apiStatus.classList.remove("api-offline", "api-fast", "api-normal", "api-slow");
+    apiStatus.classList.add(speedClass);
+    apiStatusText.textContent = isOnline ? (safeLatency < 400 ? "FAST" : safeLatency < 1200 ? "READY" : "SLOW") : "OFFLINE";
+    apiLatency.textContent = isOnline ? `${Math.round(safeLatency)} ms` : "-- ms";
+    apiNeedle.style.transform = `rotate(${needleAngle}deg)`;
+    footerApiStatus.textContent = isOnline ? "ONLINE" : "OFFLINE";
+    apiStatus.title = `${isOnline ? "API aktif" : "API tidak tersedia"} • ${isOnline ? `${Math.round(safeLatency)} ms` : "coba lagi nanti"} • ${new Date(status.checkedAt).toLocaleTimeString("id-ID")}`;
+  }
   async function checkApiStatus() {
     try {
       const response = await fetch("/api/status", { cache: "no-store" });
       const status = await response.json();
-      const isOnline = status.status === "online";
-      apiStatus.classList.toggle("api-offline", !isOnline);
-      apiStatusText.textContent = isOnline ? "ONLINE" : "OFFLINE";
-      apiLatency.textContent = isOnline ? `${status.latency} ms` : "-- ms";
-      apiNeedle.style.transform = `rotate(${isOnline ? Math.min(55, Math.max(-55, status.latency / 10 - 35)) : -55}deg)`;
-      footerApiStatus.textContent = isOnline ? "ONLINE" : "OFFLINE";
-      apiStatus.title = `Terakhir dicek: ${new Date(status.checkedAt).toLocaleTimeString("id-ID")}`;
+      updateApiMeter(status);
     } catch {
-      apiStatus.classList.add("api-offline"); apiStatusText.textContent = "OFFLINE"; apiLatency.textContent = "-- ms"; apiNeedle.style.transform = "rotate(-55deg)"; footerApiStatus.textContent = "OFFLINE";
+      updateApiMeter({ status: "offline", latency: 0, checkedAt: new Date().toISOString() });
     }
   }
   function setLoading(isLoading) { downloadButton.disabled = isLoading; buttonText.textContent = isLoading ? "Memproses link..." : "Download sekarang"; }
@@ -78,6 +87,7 @@ if (typeof document === "undefined") {
   function downloadFile(mediaUrl, filename) {
     const proxyUrl = new URL("/api/proxy-download", window.location.origin);
     proxyUrl.searchParams.set("url", mediaUrl);
+    proxyUrl.searchParams.set("filename", filename || "droply-media");
     if (window.matchMedia("(pointer: coarse)").matches) {
       window.location.assign(proxyUrl.href);
       return;
@@ -90,17 +100,20 @@ if (typeof document === "undefined") {
     link.click();
     link.remove();
   }
-  function findMediaUrl(payload) {
+  function findMediaUrl(payload, preferAudio = false) {
     if (typeof payload === "string") return /^https?:\/\//i.test(payload) ? payload : "";
     if (!payload || typeof payload !== "object") return "";
-    const preferredKeys = ["download", "download_url", "video", "video_url", "play", "no_watermark", "media", "media_url", "url"];
+    const preferredKeys = preferAudio
+      ? ["audio", "audio_url", "mp3", "music", "download", "download_url", "video", "video_url", "play", "no_watermark", "media", "media_url", "url"]
+      : ["download", "download_url", "video", "video_url", "play", "no_watermark", "media", "media_url", "url"];
     for (const key of preferredKeys) {
-      const mediaUrl = findMediaUrl(payload[key]);
+      const mediaUrl = findMediaUrl(payload[key], preferAudio);
       if (mediaUrl) return mediaUrl;
     }
     for (const [key, value] of Object.entries(payload)) {
-      if (/^(image|images|thumbnail|cover|avatar|music|author|profile)/i.test(key)) continue;
-      const mediaUrl = findMediaUrl(value);
+      if (/^(image|images|thumbnail|cover|avatar|author|profile)/i.test(key)) continue;
+      if (preferAudio && /^(video|video_url|download|download_url)$/i.test(key)) continue;
+      const mediaUrl = findMediaUrl(value, preferAudio);
       if (mediaUrl) return mediaUrl;
     }
     return "";
@@ -119,6 +132,25 @@ if (typeof document === "undefined") {
     });
     resultCount.textContent = `${images.length} foto`; resultTitle.textContent = payload.title || "Carousel foto siap diunduh"; resultMeta.textContent = `Diproses dari ${new URL(sourceUrl).hostname}`; resultLink.textContent = "Download foto  ↓"; resultLink.href = resolveMediaUrl(images[0]); resultLink.download = "droply-foto-1";
   }
+  function syncFormatSelection() {
+    const isAudioOnly = audioOnlyInput.checked;
+    if (isAudioOnly) {
+      formatInput.value = "mp3";
+      formatInput.disabled = true;
+      if (formatHint) {
+        formatHint.textContent = "Audio saja aktif: format otomatis dipaksa ke MP3.";
+      }
+      return;
+    }
+    formatInput.disabled = false;
+    if (!formatInput.value || formatInput.value === "mp3") {
+      formatInput.value = "auto";
+    }
+    if (formatHint) {
+      formatHint.textContent = "Video: format bisa diatur. Audio saja akan otomatis memakai MP3.";
+    }
+  }
+
   function setMode(mode) {
     activeMode = mode;
     const isYoutube = mode === "youtube";
@@ -133,7 +165,8 @@ if (typeof document === "undefined") {
     urlInput.placeholder = isPinterest ? "Contoh: Ronaldi" : isYoutube ? "https://youtube.com/watch?v=..." : "https://...";
     buttonText.textContent = isPinterest ? "Cari foto" : isYoutube ? "Download YouTube" : "Download sekarang";
     document.querySelector(".panel-label").textContent = isPinterest ? "CARI FOTO YANG ANDA MAU" : isYoutube ? "TEMPEL LINK YOUTUBE" : "TEMPEL LINK DI SINI";
-    document.querySelector(".download-options").hidden = isPinterest || isYoutube;
+    document.querySelector(".download-options").hidden = isPinterest;
+    syncFormatSelection();
   }
   function extractImages(payload) {
     const imageKeys = /^(hd_image|image_url|download_url|image|images|src|original|originals|url)$/i;
@@ -153,6 +186,7 @@ if (typeof document === "undefined") {
 
   urlInput.addEventListener("input", () => { clearButton.hidden = !urlInput.value; });
   clearButton.addEventListener("click", () => { urlInput.value = ""; clearButton.hidden = true; urlInput.focus(); });
+  audioOnlyInput.addEventListener("change", syncFormatSelection);
   downloadMode.addEventListener("click", () => setMode("download"));
   youtubeMode.addEventListener("click", () => setMode("youtube"));
   pinterestMode.addEventListener("click", () => setMode("pinterest"));
@@ -166,19 +200,25 @@ if (typeof document === "undefined") {
     if (!sourceUrl) return;
     setLoading(true);
     try {
+      const payloadBody = {
+        url: sourceUrl,
+        audioOnly: audioOnlyInput.checked,
+        quality: qualityInput.value || undefined,
+        format: formatInput.value || undefined,
+      };
       if (activeMode === "youtube") {
-        const endpoint = `/api/youtube`;
-        const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: sourceUrl, audioOnly: audioOnlyInput.checked, quality: qualityInput.value }) });
+        const endpoint = API_ENDPOINT;
+        const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payloadBody) });
         const responseText = await response.text();
         const payload = parseApiResponse(responseText);
         if (!response.ok) throw new Error(payload?.message || payload?.error || `Request gagal (${response.status})`);
         if (payload?.ok === false) throw new Error(payload.error || "Request ditolak oleh API.");
-        const mediaUrl = payload?.url || findMediaUrl(payload);
+        const mediaUrl = audioOnlyInput.checked ? (payload?.audio || payload?.audio_url || payload?.mp3 || findMediaUrl(payload, true) || payload?.url) : (payload?.url || findMediaUrl(payload, false));
         if (!mediaUrl) throw new Error("API merespons tanpa URL media yang bisa dibuka.");
         showResult(mediaUrl, sourceUrl, payload); return;
       }
       const endpoint = activeMode === "pinterest" ? `/api/pinterest?q=${encodeURIComponent(sourceUrl)}` : API_ENDPOINT;
-      const request = activeMode === "pinterest" ? { method: "GET" } : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: sourceUrl, audioOnly: audioOnlyInput.checked, quality: qualityInput.value }) };
+      const request = activeMode === "pinterest" ? { method: "GET" } : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payloadBody) };
       const response = await fetch(endpoint, request);
       const responseText = await response.text();
       const payload = parseApiResponse(responseText);
@@ -190,7 +230,7 @@ if (typeof document === "undefined") {
         showImageResult(images, { ...payload, title: payload.title || `Hasil Pinterest: ${sourceUrl}` }, `https://pinterest.com/search/pins/?q=${encodeURIComponent(sourceUrl)}`); return;
       }
       if (payload?.isImages && Array.isArray(payload.images) && payload.images.length) { showImageResult(payload.images, payload, sourceUrl); return; }
-      const mediaUrl = payload?.url || findMediaUrl(payload);
+      const mediaUrl = audioOnlyInput.checked ? (payload?.audio || payload?.audio_url || payload?.mp3 || findMediaUrl(payload, true) || payload?.url) : (payload?.url || findMediaUrl(payload, false));
       if (!mediaUrl) throw new Error("API merespons tanpa URL media yang bisa dibuka.");
       showResult(mediaUrl, sourceUrl, payload);
     } catch (error) { showError(error.message || "Terjadi kesalahan saat menghubungi API."); }
@@ -207,6 +247,7 @@ if (typeof document === "undefined") {
   systemPopupButton?.addEventListener("click", closeSystemPopup);
   systemPopup?.addEventListener("click", (event) => { if (event.target === systemPopup) closeSystemPopup(); });
 
+  syncFormatSelection();
   checkApiStatus();
   setInterval(checkApiStatus, 30000);
 }

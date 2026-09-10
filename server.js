@@ -7,6 +7,10 @@ const { Readable } = require("stream");
 const port = 3000;
 const root = __dirname;
 const allowedHost = "everythingjkt48.my.id";
+const allowedMediaHosts = ["tiktokcdn.com", "tiktokcdn-us.com", "tiktokv.com", "ibytedtos.com", "byteoversea.com", "muscdn.com", "cdninstagram.com", "fbcdn.net", "googlevideo.com", "pinimg.com"];
+function isAllowedMediaHost(hostname) {
+  return hostname === allowedHost || allowedMediaHosts.some((host) => hostname === host || hostname.endsWith(`.${host}`));
+}
 const mimeTypes = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8" };
 const envPath = path.join(root, ".env");
 if (fs.existsSync(envPath)) {
@@ -43,8 +47,17 @@ const server = http.createServer(async (request, response) => {
     if (!query) { response.writeHead(400); response.end(JSON.stringify({ ok: false, error: "Kata kunci pencarian wajib diisi." })); return; }
     try {
       const apiResponse = await fetch(`https://${allowedHost}/api/pinterest?q=${encodeURIComponent(query)}&apikey=${encodeURIComponent(apiKey)}`, { headers: { Authorization: `Bearer ${apiKey}` } });
+      const responseText = await apiResponse.text();
+      let responseBody;
+      try {
+        responseBody = JSON.parse(responseText);
+      } catch {
+        response.writeHead(502, { "Content-Type": "application/json" });
+        response.end(JSON.stringify({ ok: false, error: "Layanan Pinterest sedang bermasalah dan mengirim respons yang tidak valid." }));
+        return;
+      }
       response.writeHead(apiResponse.status, { "Content-Type": "application/json" });
-      response.end(await apiResponse.text());
+      response.end(JSON.stringify(responseBody));
     } catch { response.writeHead(502); response.end(JSON.stringify({ ok: false, error: "API Pinterest tidak dapat dihubungi." })); }
     return;
   }
@@ -73,17 +86,22 @@ const server = http.createServer(async (request, response) => {
   }
   if (requestUrl.pathname === "/proxy-download" || requestUrl.pathname === "/api/proxy-download") {
     const target = requestUrl.searchParams.get("url");
+    const requestedFilename = requestUrl.searchParams.get("filename") || "droply-media";
     if (!target) { response.writeHead(400); response.end("Missing url"); return; }
     try {
       const targetUrl = new URL(target);
-      if (targetUrl.hostname !== allowedHost) { response.writeHead(403); response.end("Host is not allowed"); return; }
+      if (!isAllowedMediaHost(targetUrl.hostname)) { response.writeHead(403); response.end("Host is not allowed"); return; }
       if (targetUrl.pathname === "/api/download-image" && apiKey) targetUrl.searchParams.set("apikey", apiKey);
       const mediaResponse = await fetch(targetUrl);
       if (!mediaResponse.ok || !mediaResponse.body) { response.writeHead(mediaResponse.status || 502); response.end("Media tidak dapat diunduh"); return; }
+      const contentType = mediaResponse.headers.get("content-type") || "application/octet-stream";
+      const safeFilename = requestedFilename.replace(/[\\/:*?"<>|\r\n]/g, "-").replace(/[^\x20-\x7E]/g, "-").trim() || "droply-media";
+      const extensionByType = { "video/mp4": ".mp4", "video/webm": ".webm", "audio/mpeg": ".mp3", "audio/mp4": ".m4a", "image/jpeg": ".jpg", "image/png": ".png" };
+      const filename = /\.[a-z0-9]{2,5}$/i.test(safeFilename) ? safeFilename : `${safeFilename}${extensionByType[contentType.split(";")[0].toLowerCase()] || ""}`;
       const headers = {
         "Cache-Control": "no-store",
-        "Content-Type": mediaResponse.headers.get("content-type") || "application/octet-stream",
-        "Content-Disposition": "attachment; filename=download",
+        "Content-Type": contentType,
+        "Content-Disposition": `attachment; filename="${filename}"`,
       };
       const contentLength = mediaResponse.headers.get("content-length");
       if (contentLength) headers["Content-Length"] = contentLength;

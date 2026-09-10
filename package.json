@@ -1,12 +1,21 @@
 {
-  "name": "borif-dl",
+  "name": "bor-down",
   "version": "1.0.0",
-  "description": "BorifDL — downloader media TikTok, Instagram, YouTube, X, dan pencarian foto Pinterest.",
+  "description": "BorDown — downloader media TikTok, Instagram, YouTube, X, dan pencarian foto Pinterest.",
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js"
   },
-  "keywords": ["downloader", "tiktok", "instagram", "youtube", "pinterest"],
+  "keywords": [
+    "downloader",
+    "tiktok",
+    "instagram",
+    "youtube",
+    "pinterest"
+  ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "sharp": "^0.35.4"
+  }
 }

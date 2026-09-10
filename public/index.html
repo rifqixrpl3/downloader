@@ -3,8 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="BorifDL — downloader media TikTok, Instagram, X, YouTube dan pencarian foto Pinterest.">
-  <title>BorifDL — Media Downloader</title>
+  <meta name="description" content="BorDown — downloader media TikTok, Instagram, X, YouTube dan pencarian foto Pinterest.">
+  <title>BorDown — Media Downloader</title>
+  <link rel="icon" href="/favicon.png?v=2" type="image/png" sizes="256x256">
+  <link rel="icon" href="/favicon-32x32.png?v=2" type="image/png" sizes="32x32">
+  <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/favicon-192x192.png?v=2">
+  <link rel="shortcut icon" href="/favicon.png?v=2" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,9 +18,15 @@
 <body>
   <div class="page-shell">
     <header class="topbar">
-      <a class="brand" href="./" aria-label="Droply home">
-        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
-        <span>Borif<span class="brand-dot">DL</span></span>
+      <a class="brand" href="./" aria-label="BorDown home">
+        <svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+          <path d="M38 8h24v25h16L50 61 22 33h16V8Z" />
+          <path d="M8 42c3 28 15 42 34 42 4 0 8-1 12-2-8-17-22-27-40-32 17 3 31 8 40 19 1-13-5-23-17-28-9-3-19-4-29-7Z" />
+          <path d="M92 42c-3 28-15 42-34 42-4 0-8-1-12-2 8-17 22-27 40-32-17 3-31 8-40 19-1-13 5-23 17-28 9-3 19-4 29-7Z" />
+          <path d="M48 96c-5-15-14-27-28-37 18 9 29 22 34 37-1 3-4 3-6 0Z" />
+          <path d="M52 96c5-15 14-27 28-37-18 9-29 22-34 37 1 3 4 3 6 0Z" />
+        </svg>
+        <span>Bor<span class="brand-dot">Down</span></span>
       </a>
       <div class="api-meter" id="apiStatus" title="Memeriksa status API...">
         <div class="meter-face"><span class="meter-tick tick-one"></span><span class="meter-tick tick-two"></span><span class="meter-tick tick-three"></span><span class="meter-needle" id="apiNeedle"></span><span class="meter-center"></span></div>
@@ -53,6 +64,7 @@
                 <select id="qualityInput"><option value="">Maksimal</option><option value="1080">1080p</option><option value="720">720p</option></select>
               </label>
             </div>
+            <small id="formatHint" class="format-hint">Video: format bisa diatur. Audio saja akan otomatis memakai MP3.</small>
             <button class="download-button" id="downloadButton" type="submit">
               <span id="buttonText">Download sekarang</span>
               <span class="button-arrow" aria-hidden="true">↗</span>
@@ -93,17 +105,25 @@
     </main>
 
     <footer class="footer">
-      <span>BORIF<span class="brand-dot">DL</span> / BUILT FOR THE INTERNET</span>
+      <span>BOR<span class="brand-dot">DOWN</span> / BY: <a class="footer-link" href="https://www.instagram.com/yaneeta30/" target="_blank" rel="noopener noreferrer">@yaneeta30</a></span>
       <span class="settings-button">API <span id="footerApiStatus">CHECKING</span></span>
     </footer>
   </div>
   <div class="system-popup" id="systemPopup" role="dialog" aria-modal="true" aria-labelledby="systemPopupTitle">
     <div class="system-popup-card">
       <button class="system-popup-close" id="systemPopupClose" type="button" aria-label="Tutup notifikasi">&times;</button>
-      <span class="system-popup-icon" aria-hidden="true">&#10022;</span>
-      <p class="eyebrow">INFORMASI SISTEM</p>
-      <h2 id="systemPopupTitle">Web ini bekerja berkat sistem dari <strong>Everything JKT48</strong>.</h2>
-      <button class="system-popup-button" id="systemPopupButton" type="button">Mengerti</button>
+      <span class="system-popup-icon" aria-hidden="true">
+        <svg viewBox="0 0 100 100" focusable="false">
+          <path d="M38 8h24v25h16L50 61 22 33h16V8Z" />
+          <path d="M8 42c3 28 15 42 34 42 4 0 8-1 12-2-8-17-22-27-40-32 17 3 31 8 40 19 1-13-5-23-17-28-9-3-19-4-29-7Z" />
+          <path d="M92 42c-3 28-15 42-34 42-4 0-8-1-12-2 8-17 22-27 40-32-17 3-31 8-40 19-1-13 5-23 17-28 9-3 19-4 29-7Z" />
+          <path d="M48 96c-5-15-14-27-28-37 18 9 29 22 34 37-1 3-4 3-6 0Z" />
+          <path d="M52 96c5-15 14-27 28-37-18 9-29 22-34 37 1 3 4 3 6 0Z" />
+        </svg>
+      </span>
+      <p class="eyebrow">SYSTEM INFORMATION</p>
+      <h2 id="systemPopupTitle">This website works thanks to the system from <strong>Everything JKT48</strong>.</h2>
+      <button class="system-popup-button" id="systemPopupButton" type="button">I Understand</button>
     </div>
   </div>
   <script src="app.js"></script>
