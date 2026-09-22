@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BorDown — TikTok, Instagram, X, YouTube media downloader and Pinterest photo search.">
+  <title>BorDown — Media Downloader</title>
+  <link rel="icon" href="/favicon.png?v=2" type="image/png" sizes="256x256">
+  <link rel="icon" href="/favicon-32x32.png?v=2" type="image/png" sizes="32x32">
+  <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/favicon-192x192.png?v=2">
+  <link rel="shortcut icon" href="/favicon.png?v=2" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="BorDown home">
+        <svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+          <path d="M38 8h24v25h16L50 61 22 33h16V8Z" />
+          <path d="M8 42c3 28 15 42 34 42 4 0 8-1 12-2-8-17-22-27-40-32 17 3 31 8 40 19 1-13-5-23-17-28-9-3-19-4-29-7Z" />
+          <path d="M92 42c-3 28-15 42-34 42-4 0-8-1-12-2 8-17 22-27 40-32-17 3-31 8-40 19-1-13 5-23 17-28 9-3 19-4 29-7Z" />
+          <path d="M48 96c-5-15-14-27-28-37 18 9 29 22 34 37-1 3-4 3-6 0Z" />
+          <path d="M52 96c5-15 14-27 28-37-18 9-29 22-34 37 1 3 4 3 6 0Z" />
+        </svg>
+        <span>Bor<span class="brand-dot">Down</span></span>
+      </a>
+
+      <div class="topbar-tools">
+        <div class="wib-clock" aria-live="polite" aria-label="Current time in WIB">
+          <span class="wib-label">WIB</span>
+          <span id="wibClock">--:--:--</span>
+        </div>
+
+        <div class="api-meter" id="apiStatus" title="Checking API status...">
+          <div class="meter-face"><span class="meter-tick tick-one"></span><span class="meter-tick tick-two"></span><span class="meter-tick tick-three"></span><span class="meter-needle" id="apiNeedle"></span><span class="meter-center"></span></div>
+          <div class="meter-readout"><span class="status-dot"></span><span id="apiStatusText">CHECKING</span><small id="apiLatency">-- ms</small></div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero-section">
+        <div class="hero-copy">
+          <h1>Save your<br><em>File.</em></h1>
+          <p class="hero-description">Download your favorite videos and photos from TikTok, Instagram, YouTube, and X in seconds.</p>
+        </div>
+
+        <div class="download-panel" id="dropZone">
+          <div class="panel-topline">
+            <span class="panel-label">Enter link</span>
+          </div>
+          <div class="mode-tabs" role="tablist" aria-label="Choose mode">
+            <button class="mode-tab active" id="downloadMode" type="button" role="tab" aria-selected="true">Download media</button>
+            <button class="mode-tab" id="youtubeMode" type="button" role="tab" aria-selected="false">YouTube</button>
+            <button class="mode-tab" id="pinterestMode" type="button" role="tab" aria-selected="false">Search Pinterest</button>
+          </div>
+          <form id="downloadForm">
+            <div class="url-field-wrap">
+              <span class="link-icon" aria-hidden="true">↗</span>
+              <input id="urlInput" name="url" type="url" placeholder="https://..." autocomplete="url" required>
+              <button class="clear-button" id="clearButton" type="button" aria-label="Clear link" hidden>×</button>
+            </div>
+            <div class="download-options">
+              <label class="option-toggle"><input id="audioOnlyInput" type="checkbox"><span class="toggle-track"></span><span>Audio only</span></label>
+              <label class="quality-option" for="qualityInput">QUALITY
+                <select id="qualityInput"><option value="">Maximum</option><option value="1080">1080p</option><option value="720">720p</option></select>
+                <select id="formatInput" hidden>
+                  <option value="auto">Auto</option>
+                  <option value="mp3">MP3</option>
+                  <option value="mp4">MP4</option>
+                  <option value="webm">WEBM</option>
+                </select>
+              </label>
+            </div>
+            <small id="formatHint" class="format-hint">Video: format can be adjusted. Audio-only automatically uses MP3.</small>
+            <button class="download-button" id="downloadButton" type="submit">
+              <span id="buttonText">Download now</span>
+              <span class="button-arrow" aria-hidden="true">↗</span>
+            </button>
+          </form>
+          <div class="supported-row">
+            <span>SUPPORT</span>
+            <span class="platform-chip"><b>♪</b> TikTok</span>
+            <span class="platform-chip"><b>◎</b> Instagram</span>
+            <span class="platform-chip"><b>▶</b> YouTube</span>
+            <span class="platform-chip"><b>𝕏</b> X</span>
+            <span class="platform-chip pinterest-chip"><b>▧</b> Pinterest</span>
+          </div>
+        </div>
+        <div class="drop-caption"><span class="sparkle">✦</span> or drop a link anywhere in this area</div>
+      </section>
+
+      <section class="result-section" id="resultSection" aria-live="polite">
+        <div class="section-heading">
+          <p class="eyebrow">DOWNLOAD RESULTS</p>
+          <span class="result-count" id="resultCount">0 items</span>
+        </div>
+        <div class="result-card empty-state" id="emptyState">
+          <div class="empty-icon">↓</div>
+          <div><strong>No downloads yet</strong><span>Your files will appear here.</span></div>
+        </div>
+        <div class="result-card result-content" id="resultContent" hidden>
+          <div class="result-icon" aria-hidden="true">✓</div>
+          <div class="result-details">
+            <strong id="resultTitle">Media ready to download</strong>
+            <span id="resultMeta">Link processed successfully</span>
+          </div>
+          <a class="open-button" id="resultLink" href="#" download>Download file <span>↓</span></a>
+        </div>
+        <div class="image-gallery" id="imageGallery" hidden></div>
+        <div class="error-message" id="errorMessage" role="alert" hidden></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>BOR<span class="brand-dot">DOWN</span> / BY: <a class="footer-link" href="https://www.instagram.com/yaneeta30/" target="_blank" rel="noopener noreferrer">@yaneeta30</a></span>
+      <span class="settings-button">API <span id="footerApiStatus">CHECKING</span></span>
+    </footer>
+  </div>
+  <div class="system-popup" id="systemPopup" role="dialog" aria-modal="true" aria-labelledby="systemPopupTitle">
+    <div class="system-popup-card">
+      <button class="system-popup-close" id="systemPopupClose" type="button" aria-label="Close notification">&times;</button>
+      <span class="system-popup-icon" aria-hidden="true">
+        <img class="system-popup-logo" src="https://rynex.everythingjkt48.my.id/logo.png" alt="Rynex logo" />
+      </span>
+      <p class="eyebrow">SYSTEM INFORMATION</p>
+      <h2 id="systemPopupTitle">This website works thanks to the system from <strong>Rynex JKT48</strong>.</h2>
+      <button class="system-popup-button" id="systemPopupButton" type="button">I Understand</button>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
