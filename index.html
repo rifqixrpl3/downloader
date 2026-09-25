@@ -16,6 +16,28 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <div class="page-loader" id="pageLoader" role="status" aria-live="polite" aria-label="Loading BorDown">
+    <div class="loader-content">
+      <div class="loader-scene" aria-hidden="true">
+        <div class="loader-orbit loader-orbit-one"></div>
+        <div class="loader-orbit loader-orbit-two"></div>
+        <div class="loader-cube">
+          <div class="loader-face loader-front"><span class="loader-mark">B</span><span class="loader-face-caption">BORDOWN</span></div>
+          <div class="loader-face loader-back"></div>
+          <div class="loader-face loader-right"></div>
+          <div class="loader-face loader-left"></div>
+          <div class="loader-face loader-top"></div>
+          <div class="loader-face loader-bottom"></div>
+        </div>
+        <span class="loader-light loader-light-one"></span>
+        <span class="loader-light loader-light-two"></span>
+      </div>
+      <p class="loader-kicker">YOUR MEDIA, IN MOTION</p>
+      <p class="loader-title">Getting things ready<span>...</span></p>
+      <div class="loader-track" aria-hidden="true"><span class="loader-progress"></span></div>
+      <p class="loader-caption">Preparing your download space</p>
+    </div>
+  </div>
   <div class="page-shell">
     <header class="topbar">
       <a class="brand" href="./" aria-label="BorDown home">
@@ -47,6 +69,21 @@
         <div class="hero-copy">
           <h1>Save your<br><em>File.</em></h1>
           <p class="hero-description">Download your favorite videos and photos from TikTok, Instagram, YouTube, and X in seconds.</p>
+        </div>
+
+        <div class="hero-object" aria-hidden="true">
+          <div class="object-orbit object-orbit-one"></div>
+          <div class="object-orbit object-orbit-two"></div>
+          <div class="object-cube">
+            <div class="cube-face cube-front"><svg viewBox="0 0 48 48"><path d="M24 7v22m0 0 9-9m-9 9-9-9M11 31v8h26v-8" /></svg></div>
+            <div class="cube-face cube-back"></div>
+            <div class="cube-face cube-right"></div>
+            <div class="cube-face cube-left"></div>
+            <div class="cube-face cube-top"></div>
+            <div class="cube-face cube-bottom"></div>
+          </div>
+          <span class="object-spark object-spark-one"></span>
+          <span class="object-spark object-spark-two"></span>
         </div>
 
         <div class="download-panel" id="dropZone">
@@ -117,7 +154,7 @@
     </main>
 
     <footer class="footer">
-      <span>BOR<span class="brand-dot">DOWN</span> / BY: <a class="footer-link" href="https://www.instagram.com/yaneeta30/" target="_blank" rel="noopener noreferrer">@yaneeta30</a></span>
+      <span class="footer-credit"><span>BOR<span class="brand-dot">DOWN</span> / BY: <a class="footer-link" href="https://www.instagram.com/yaneeta30/" target="_blank" rel="noopener noreferrer">@yaneeta30</a></span><span class="powered-by">System powered by <strong>Everything JKT48</strong></span></span>
       <span class="settings-button">API <span id="footerApiStatus">CHECKING</span></span>
     </footer>
   </div>

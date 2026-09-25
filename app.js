@@ -41,8 +41,27 @@
   const systemPopup = document.querySelector("#systemPopup");
   const systemPopupClose = document.querySelector("#systemPopupClose");
   const systemPopupButton = document.querySelector("#systemPopupButton");
+  const pageLoader = document.querySelector("#pageLoader");
 
   let activeMode = "download";
+
+  if (pageLoader) {
+    const loaderStartedAt = performance.now();
+    const isSmallScreen = window.matchMedia("(max-width: 680px)").matches;
+    const minimumLoaderTime = isSmallScreen ? 5500 : 1500;
+    let loaderDismissalScheduled = false;
+    const dismissPageLoader = () => {
+      if (loaderDismissalScheduled) return;
+      loaderDismissalScheduled = true;
+      const remainingIntro = Math.max(0, minimumLoaderTime - (performance.now() - loaderStartedAt));
+      window.setTimeout(() => {
+        pageLoader.classList.add("is-hidden");
+        window.setTimeout(() => pageLoader.remove(), 750);
+      }, remainingIntro);
+    };
+    window.addEventListener("load", dismissPageLoader, { once: true });
+    window.setTimeout(dismissPageLoader, 10000);
+  }
 
   function updateWibClock() {
     if (!wibClock) return;
